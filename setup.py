@@ -13,6 +13,9 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/biojet1/dupln",
     packages=setuptools.find_packages(),
+    entry_points={
+        "console_scripts": ["dupln=dupln.__main__:main"],
+    },
     install_requires=["ocli"],
     classifiers=[
         "Intended Audience :: Developers",
