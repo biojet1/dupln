@@ -96,4 +96,8 @@ class App(BasicLog, Main):
         return self.total
 
 
+def main():
+    return App().main()
+
+
 (__name__ == "__main__") and App().main()

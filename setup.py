@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="dupln",
-    version="0.0.2",
+    version="0.0.3",
     author="biojet1",
     author_email="biojet1@gmail.com",
     description="Hard link files with same content",
@@ -13,6 +13,9 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/biojet1/dupln",
     packages=setuptools.find_packages(),
+    entry_points={
+        "console_scripts": ["dupln=dupln.__main__:main"],
+    },
     install_requires=["ocli"],
     classifiers=[
         "Intended Audience :: Developers",
