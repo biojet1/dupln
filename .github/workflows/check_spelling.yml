@@ -19,10 +19,6 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
       - name: GitHub Spellcheck
         # You may pin to the exact commit or the version.
         # uses: igsekor/pyspelling-any@155eb06641bb9259cab59b5126a40be943ecb4f7

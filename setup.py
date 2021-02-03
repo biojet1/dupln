@@ -1,18 +1,15 @@
-import setuptools
+from setuptools import setup, find_packages
 
-with open("README.md", "r", encoding="utf-8") as fh:
-    long_description = fh.read()
-
-setuptools.setup(
+setup(
     name="dupln",
-    version="0.0.2",
+    version="0.0.3",
     author="biojet1",
     author_email="biojet1@gmail.com",
     description="Hard link files with same content",
-    long_description=long_description,
+    long_description=open("README.md", "r", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     url="https://github.com/biojet1/dupln",
-    packages=setuptools.find_packages(),
+    packages=find_packages(),
     entry_points={
         "console_scripts": ["dupln=dupln.__main__:main"],
     },

@@ -1,0 +1,16 @@
+matrix:
+- name: markdown
+  sources:
+  - '**/*.md'
+  default_encoding: utf-8
+  pipeline:
+  - pyspelling.filters.markdown:
+  - pyspelling.filters.html:
+      comments: false
+      attributes:
+      - title
+      - alt
+      ignores:
+      - code
+      - pre
+      - blockquote

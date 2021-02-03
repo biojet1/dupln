@@ -10,7 +10,7 @@ class Test(unittest.TestCase):
         from shutil import rmtree
         from os import makedirs
 
-        tmp = join(gettempdir(), "he9wnq")
+        tmp = join(gettempdir(), "dupln")
 
         data = dict(
             filter(
