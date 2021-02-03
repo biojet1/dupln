@@ -121,7 +121,7 @@ def link_dups(linker, dups):
             rename(dup, tmp)
             assert exists(tmp)
             assert not exists(dup)
-            info("\t> %r - %r [%s]", dup, tmp, len(dups))
+            info(" - %r - %r [%s]", dup, tmp, len(dups))
             try:  # link src to dup
                 linker(src, dup)
             except OverflowError:
@@ -142,7 +142,7 @@ def link_dups(linker, dups):
                 unlink(tmp)
         else:
             src = dup
-            info("Link: %r [%s]", src, len(dups))
+            info("++ %r [%s]", src, len(dups))
     return n
 
 
