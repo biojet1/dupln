@@ -1,5 +1,5 @@
-from ocli import param, arg, flag, Main
-from ocli.extra import Counter, BasicLog
+from ocli import Base, Main, arg, flag, param
+from ocli.extra import BasicLog, Counter, DryRunOpt, LogOpt
 
 
 def filesizef(s):
@@ -20,30 +20,46 @@ class Counter2(Counter):
         return str(value)
 
 
-@arg(append="paths", required="+")
-@arg("action", choices=("link", "stat", "unique_files", "debug"), required=True)
-@flag("dry_run", help="Test run")
-@flag("carry_on", help="Continue on file errors", default=None)
-@param(
-    "linker",
-    "l",
-    help="The linker to use",
-    choices=("os.link", "ln", "lns", "os.symlink"),
-    default="os.link",
-)
-class App(BasicLog, Main):
-    def start(self, **kwargs):
-        from stat import S_ISDIR
-        from logging import info, error
-        from os import stat
-        from . import (
-            Database,
-            get_linker,
-            list_uniques,
-            link_duplicates,
-            dump_db,
-            scan_dir,
+# @arg(append="paths", required="+")
+# @arg("action", choices=("link", "stat", "unique_files", "debug"), required=True)
+# @flag("dry_run", help="Test run")
+# @flag("carry_on", help="Continue on file errors", default=None)
+# @param(
+#     "linker",
+#     "l",
+#     help="The linker to use",
+#     choices=("os.link", "ln", "lns", "os.symlink"),
+#     default="os.link",
+# )
+# class App(BasicLog, Main):
+class App(LogOpt, DryRunOpt, Base):
+    dry_run = False
+
+    def options(self, opt):
+        super().options(
+            opt.arg(
+                "action",
+                choices=("link", "stat", "unique_files", "debug"),
+                required=True,
+            )
+            .arg(append="paths", required="+")
+            .flag("carry_on", help="Continue on file errors", default=None)
+            .param(
+                "linker",
+                "l",
+                help="The linker to use",
+                choices=("os.link", "ln", "lns", "os.symlink"),
+                default="os.link",
+            )
         )
+
+    def start(self, **kwargs):
+        from logging import error, info
+        from os import stat
+        from stat import S_ISDIR
+
+        from . import (Database, dump_db, get_linker, link_duplicates,
+                       list_uniques, scan_dir)
 
         # print("start", self.__dict__)
         # print("action", self.action)
