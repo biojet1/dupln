@@ -2,6 +2,7 @@
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 [![PyPI version fury.io](https://badge.fury.io/py/dupln.svg)](https://pypi.python.org/pypi/dupln/)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/dupln.svg)](https://pypi.python.org/pypi/dupln/)
+[![PyPI license](https://img.shields.io/pypi/l/dupln.svg)](https://pypi.python.org/pypi/dupln/)
 ![Python package](https://github.com/biojet1/dupln/workflows/Python%20package/badge.svg)
 ![Upload Python Package](https://github.com/biojet1/dupln/workflows/Upload%20Python%20Package/badge.svg)
 
@@ -74,7 +75,7 @@ INFO: Scanning: '/tmp/dupln'
 INFO: Total devices 1; disk_size 564b; files 35; inodes 18; same_ino 9; size 1.1k; unique_size 8;
 ```
 
-## list unique file content
+## show stats about duplicate files 
 ```
 > dupln stat '/tmp/dupln'
 INFO: Scanning: '/tmp/dupln'

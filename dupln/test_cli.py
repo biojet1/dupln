@@ -7,8 +7,8 @@ class Test(unittest.TestCase):
     def test_link(self):
         import string
         from os.path import join, split, exists
-        from shutil import rmtree
         from os import makedirs
+        from shutil import rmtree
 
         tmp = join(gettempdir(), "dupln")
 
@@ -47,13 +47,13 @@ class Test(unittest.TestCase):
                         put_bytes(b, join(tmp, k))
 
             return dict(
-                same_file=len([count for count in same_file.values() if count > 1]),
+                same_file=sum(1 for count in same_file.values() if count > 1),
                 unique_files=len(same_file),
                 disk_size=sum(size_hash[0] for size_hash in same_file.keys()),
                 size=sum(
                     size_hash[0] * count for size_hash, count in same_file.items()
                 ),
-                files=sum(count for count in same_file.values()),
+                files=sum(same_file.values()),
                 same_size=len(set(size_hash[0] for size_hash in same_file.keys())),
                 linked=sum(count - 1 for count in same_file.values() if count > 1),
             )
@@ -99,4 +99,3 @@ class Test(unittest.TestCase):
         self.assertEqual(total.same_size, v["same_size"])
         self.assertEqual(total.inodes, v["unique_files"])
         self.assertEqual(total.size, v["size"])
-        print(v)

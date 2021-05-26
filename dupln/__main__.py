@@ -1,8 +1,9 @@
-from ocli import param, arg, flag, Main
-from ocli.extra import Counter, BasicLog
+from ocli import Base
+from ocli.extra import Counter as Total, DryRunOpt, LogOpt
 
 
 def filesizef(s):
+    # type: (Union[int, float]) -> str
     if not s and s != 0:
         return "-"
     for x in "bkMGTPEZY":
@@ -12,36 +13,46 @@ def filesizef(s):
     return ("%.1f" % s).rstrip("0").rstrip(".") + x
 
 
-class Counter2(Counter):
+class Counter2(Total):
     def _format_value(self, value, key):
-        # print(key, value)
+        # type: (Any, str) -> str
         if key in ("size", "disk_size"):
             return filesizef(value)
         return str(value)
 
 
-@arg(append="paths", required="+")
-@arg("action", choices=("link", "stat", "unique_files", "debug"), required=True)
-@flag("dry_run", help="Test run")
-@flag("carry_on", help="Continue on file errors", default=None)
-@param(
-    "linker",
-    "l",
-    help="The linker to use",
-    choices=("os.link", "ln", "lns", "os.symlink"),
-    default="os.link",
-)
-class App(BasicLog, Main):
+class App(LogOpt, DryRunOpt, Base):
+    dry_run = False
+
+    def options(self, opt):
+        super().options(
+            opt.arg(
+                "action",
+                choices=("link", "stat", "unique_files", "debug"),
+                required=True,
+            )
+            .arg(append="paths", required="+")
+            .flag("carry_on", help="Continue on file errors", default=None)
+            .param(
+                "linker",
+                "l",
+                help="The linker to use",
+                choices=("os.link", "ln", "lns", "os.symlink"),
+                default="os.link",
+            )
+        )
+
     def start(self, **kwargs):
-        from stat import S_ISDIR
-        from logging import info, error
+        from logging import error, info
         from os import stat
+        from stat import S_ISDIR
+
         from . import (
-            Database,
-            get_linker,
-            list_uniques,
-            link_duplicates,
+            add_file,
             dump_db,
+            get_linker,
+            link_duplicates,
+            list_uniques,
             scan_dir,
         )
 
@@ -49,7 +60,7 @@ class App(BasicLog, Main):
         # print("action", self.action)
         # print("linker", self.paths)
 
-        db = Database()
+        db = dict()
         tot = self.total = Counter2()
         carry_on = self.carry_on
 
@@ -72,7 +83,7 @@ class App(BasicLog, Main):
             if S_ISDIR(mode):
                 scan_dir(x, db, statx)
             else:
-                db.add(x, size, ino, dev, mtime)
+                add_file(db, x, size, ino, dev, mtime)
         action = self.action
 
         try:
@@ -100,4 +111,9 @@ def main():
     return App().main()
 
 
-(__name__ == "__main__") and App().main()
+(__name__ == "__main__") and main()
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import *
