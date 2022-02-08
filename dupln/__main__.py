@@ -25,6 +25,7 @@ class App(LogOpt, DryRunOpt, Base):
     dry_run = False
 
     def options(self, opt):
+        opt.prog = "python -m dupln"
         super().options(
             opt.arg(
                 "action",
