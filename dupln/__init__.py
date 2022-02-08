@@ -6,32 +6,30 @@ from tempfile import mktemp
 from stat import S_ISREG, S_IWUSR
 
 
-class Database(dict):
-    def add(self, path, size, ino, dev, mtime):
+def add_file(db, path, size, ino, dev, mtime):
+    # type: (Dict[int, Dict[int, Dict[int, Set[str]]]], str, int, int, int, float) -> None
 
-        # dev_map = self.get((dev, size))
+    dev_map = db.get(dev)
+    if dev_map is None:
+        dev_map = db[dev] = {}
 
-        dev_map = self.get(dev)
-        if dev_map is None:
-            dev_map = self[dev] = {}
+    size_map = dev_map.get(size)
+    if size_map is None:
+        size_map = dev_map[size] = {}
 
-        size_map = dev_map.get(size)
-        if size_map is None:
-            size_map = dev_map[size] = {}
-
-        ino_map = size_map.get(ino)
-        if ino_map is None:
-            # ino_map = size_map[ino] = {}
-            ino_map = size_map[ino] = set()
-
+    ino_map = size_map.get(ino)
+    if ino_map is None:
+        size_map[ino] = set([path])
+    else:
         ino_map.add(path)
 
-        # v = ino_map.get(path)
-        # if v is None:
-        #     ino_map[path] = 0
+    # v = ino_map.get(path)
+    # if v is None:
+    #     ino_map[path] = 0
 
 
 def calc_md5(src, block_size=131072):
+    # type: (str, int) -> str
     m = md5()
     with open(src, "rb") as h:
         b = h.read(block_size)
@@ -42,10 +40,12 @@ def calc_md5(src, block_size=131072):
 
 
 def file_sort_key(x):
+    # type: (str) -> float
     return stat(x).st_mtime
 
 
 def link_duplicates(db, linker, tot, carry_on):
+    # type: (Dict[int, Dict[int, Dict[int, Set[str]]]], Callable[[str, str], None], Any, bool) -> None
     if len(db) > 1:
         tot.devices = len(db)
     while db:
@@ -65,7 +65,9 @@ def link_duplicates(db, linker, tot, carry_on):
                 continue
             else:
                 tot.same_size += 1
-            md5_map = {} if linker else 0
+            md5_map = (
+                {} if linker else 0
+            )  # type: Union[Literal[0], Dict[str, Set[str]]]
 
             while ino_map:
                 ino, paths = ino_map.popitem()
@@ -82,8 +84,9 @@ def link_duplicates(db, linker, tot, carry_on):
                     md5 = calc_md5(src)
                     files = md5_map.get(md5)
                     if files is None:
-                        files = md5_map[md5] = set()
-                    files.add(src)
+                        md5_map[md5] = set([src])
+                    else:
+                        files.add(src)
 
             while md5_map:
                 md5, files = md5_map.popitem()
@@ -91,9 +94,8 @@ def link_duplicates(db, linker, tot, carry_on):
                 tot.size += size * n
                 if n > 1:
                     tot.same_hash += 1
-                    files = sorted(files, key=file_sort_key)
                     try:
-                        n = link_dups(linker, files)
+                        n = link_dups(linker, sorted(files, key=file_sort_key))
                     except Exception:
                         tot.link_err += 1
                         if not carry_on:
@@ -110,7 +112,9 @@ def link_duplicates(db, linker, tot, carry_on):
 
 
 def link_dups(linker, dups):
-    src = n = 0
+    # type: (Callable[[str, str], None], List[str]) -> int
+    src = ""
+    n = 0
     while dups:
         dup = dups.pop()
         if src:
@@ -126,13 +130,15 @@ def link_dups(linker, dups):
                 linker(src, dup)
             except OverflowError:
                 # rename back on error
-                exists(tmp) and rename(tmp, dup)
+                if exists(tmp):
+                    rename(tmp, dup)
                 src = dup
                 info("\t! Too many links")
             except Exception:
                 # rename back on error
                 info("\t! Link failed")
-                exists(tmp) and rename(tmp, dup)
+                if exists(tmp):
+                    rename(tmp, dup)
                 raise
             else:  # delete tmp
                 n += 1
@@ -147,6 +153,7 @@ def link_dups(linker, dups):
 
 
 def get_linker(use_linker):
+    # type: (str) -> Callable[[str, str], None]
     from subprocess import call
 
     if use_linker == "ln":
@@ -175,6 +182,7 @@ def get_linker(use_linker):
 
 
 def list_uniques(db, tot):
+    # type: (Dict[int, Dict[int, Dict[int, Set[str]]]], Any) -> None
     tot.devices = len(db)
 
     while db:
@@ -196,12 +204,13 @@ def list_uniques(db, tot):
 
 
 def dump_db(db):
+    # type: (Dict[int, Dict[int, Dict[int, Set[str]]]]) -> None
     from sys import stdout
 
-    if len(db) == 1:
-        db = db.popitem()[1]
+    data = db.popitem()[1] if len(db) == 1 else db  # type: Any
+
     try:
-        from yaml import dump, safe_dump
+        from yaml import safe_dump
     except ImportError:
         from json import dump, JSONEncoder
 
@@ -211,16 +220,24 @@ def dump_db(db):
                     return list(obj)
                 return JSONEncoder.default(self, obj)
 
-        dump(db, stdout, cls=SetEncoder, indent=4)
+        dump(data, stdout, cls=SetEncoder, indent=4)
 
     else:
-        return safe_dump(db, stdout, canonical=False, tags=False, indent=True)
+        return safe_dump(data, stdout, canonical=False, tags=False, indent=True)
 
 
 def scan_dir(tree, db, statx):
+    # type: (str, Dict[int, Dict[int, Dict[int, Set[str]]]], Callable[[str], tuple]) -> None
     info("Scanning: %r", tree)
     for root, dirs, files in walk(tree):
         for name in files:
             f = join(root, name)
             (mode, size, ino, dev, mtime) = statx(f)
-            S_ISREG(mode) and db.add(f, size, ino, dev, mtime)
+            if S_ISREG(mode):
+                add_file(db, f, size, ino, dev, mtime)
+
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import *
