@@ -1,4 +1,5 @@
 # DupLn
+![DupLn Logo](dupln.png)
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 [![PyPI version fury.io](https://badge.fury.io/py/dupln.svg)](https://pypi.python.org/pypi/dupln/)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/dupln.svg)](https://pypi.python.org/pypi/dupln/)
