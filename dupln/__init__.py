@@ -107,7 +107,7 @@ def link_duplicates(db, linker, tot, carry_on):
                         tot.linked += n
                         tot.disk_size += size
                 else:  # n == 1
-                    tot.uniq_hash += 1
+                    tot.unique_hash += 1
                     tot.disk_size += size
 
 

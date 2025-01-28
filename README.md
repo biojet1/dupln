@@ -100,4 +100,4 @@ INFO: Total disk_size 564b; files 35; inodes 18; same_ino 9; same_size 8; size 1
 - same_size - total unique size found at least twice
 - same_hash - total unique hash found at least twice
 - unique_size - total unique size found
-- uniq_hash - total unique file hash found
+- unique_hash - total unique file hash found
