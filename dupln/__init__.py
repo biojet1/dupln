@@ -203,6 +203,30 @@ def list_uniques(db, tot):
                 print(path)
 
 
+def list_duplicates(db, tot):
+    # type: (Dict[int, Dict[int, Dict[int, Set[str]]]], Any) -> None
+    tot.devices = len(db)
+
+    while db:
+        dev, size_map = db.popitem()
+        tot.unique_size = len(size_map)
+        while size_map:
+            size, ino_map = size_map.popitem()
+            while ino_map:
+                ino, paths = ino_map.popitem()
+                n = len(paths)
+                if n > 1:
+                    tot.same_ino += 1
+                    print(f"+ inode:{ino} links:{n} size:{size}")
+                    for p in paths:
+                        print(f"\t- {p}")
+                tot.files += n
+                tot.inodes += 1
+                tot.size += n * size
+                tot.disk_size += size
+                path = paths.pop()
+
+
 def dump_db(db):
     # type: (Dict[int, Dict[int, Dict[int, Set[str]]]]) -> None
     from sys import stdout
