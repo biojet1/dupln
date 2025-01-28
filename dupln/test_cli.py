@@ -48,7 +48,7 @@ class Test(unittest.TestCase):
 
             return dict(
                 same_file=sum(1 for count in same_file.values() if count > 1),
-                unique_files=len(same_file),
+                uniques=len(same_file),
                 disk_size=sum(size_hash[0] for size_hash in same_file.keys()),
                 size=sum(
                     size_hash[0] * count for size_hash, count in same_file.items()
@@ -72,7 +72,7 @@ class Test(unittest.TestCase):
         self.assertEqual(total.size, v["size"])
 
         # Total devices 1; disk_size 836b; files 26; inodes 26; size 836b; unique_size 8;
-        total = App().main(["cmd", "unique_files", tmp])
+        total = App().main(["cmd", "uniques", tmp])
         self.assertEqual(total.disk_size, v["size"])
         self.assertEqual(total.files, v["files"])
         self.assertEqual(total.inodes, v["files"])
@@ -89,10 +89,10 @@ class Test(unittest.TestCase):
         self.assertEqual(total.same_size, v["same_size"])
         self.assertEqual(total.size, v["size"])
         #
-        total = App().main(["cmd", "unique_files", tmp])
+        total = App().main(["cmd", "uniques", tmp])
         self.assertEqual(total.disk_size, v["disk_size"])
         self.assertEqual(total.files, v["files"])
-        self.assertEqual(total.inodes, v["unique_files"])
+        self.assertEqual(total.inodes, v["uniques"])
         self.assertEqual(total.size, v["size"])
         self.assertEqual(total.unique_size, v["same_size"])
         #
@@ -100,7 +100,7 @@ class Test(unittest.TestCase):
         self.assertEqual(total.disk_size, v["disk_size"])
         self.assertEqual(total.files, v["files"])
         self.assertEqual(total.same_size, v["same_size"])
-        self.assertEqual(total.inodes, v["unique_files"])
+        self.assertEqual(total.inodes, v["uniques"])
         self.assertEqual(total.size, v["size"])
 
     def test_link_2(self):
@@ -147,7 +147,7 @@ class Test(unittest.TestCase):
 
             return dict(
                 same_file=sum(1 for count in same_file.values() if count > 1),
-                unique_files=len(same_file),
+                uniques=len(same_file),
                 disk_size=sum(size_hash[0] for size_hash in same_file.keys()),
                 size=sum(
                     size_hash[0] * count for size_hash, count in same_file.items()
@@ -171,7 +171,7 @@ class Test(unittest.TestCase):
         self.assertEqual(total.same_size, v["same_size"])
         self.assertEqual(total.size, v["size"])
         a = Main()
-        a.main(["unique_files", tmp])
+        a.main(["uniques", tmp])
         total = a._child_arg.total
         self.assertEqual(total.disk_size, v["size"])
         self.assertEqual(total.files, v["files"])
@@ -196,13 +196,13 @@ class Test(unittest.TestCase):
         self.assertEqual(total.disk_size, v["disk_size"])
         self.assertEqual(total.files, v["files"])
         self.assertEqual(total.same_size, v["same_size"])
-        self.assertEqual(total.inodes, v["unique_files"])
+        self.assertEqual(total.inodes, v["uniques"])
         self.assertEqual(total.size, v["size"])
         a = Main()
-        a.main(["unique_files", tmp])
+        a.main(["uniques", tmp])
         total = a._child_arg.total
         self.assertEqual(total.disk_size, v["disk_size"])
         self.assertEqual(total.files, v["files"])
-        self.assertEqual(total.inodes, v["unique_files"])
+        self.assertEqual(total.inodes, v["uniques"])
         self.assertEqual(total.size, v["size"])
         self.assertEqual(total.unique_size, v["same_size"])

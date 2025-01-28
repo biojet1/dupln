@@ -219,7 +219,7 @@ def list_duplicates(db, tot):
                     tot.same_ino += 1
                     print(f"+ inode:{ino} links:{n} size:{size}")
                     for p in paths:
-                        print(f"\t- {p}")
+                        print(f" - {p}")
                 tot.files += n
                 tot.inodes += 1
                 tot.size += n * size

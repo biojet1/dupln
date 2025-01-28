@@ -1,4 +1,5 @@
 # DupLn
+
 ![DupLn Logo](dupln.png)
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 [![PyPI version fury.io](https://badge.fury.io/py/dupln.svg)](https://pypi.python.org/pypi/dupln/)
@@ -13,12 +14,15 @@
 Hard link files with same content
 
 # Install
+
 ```
 > pip install dupln
 ```
 
 # Usage
+
 ## hard link files with same content
+
 ```
 > dupln link '/tmp/dupln'
 INFO: Scanning: '/tmp/dupln'
@@ -52,8 +56,9 @@ INFO: Total disk_size 564b; files 35; inodes 35; linked 17; same_hash 9; same_si
 ```
 
 ## list unique file content
+
 ```
-> dupln unique_files '/tmp/dupln'
+> dupln uniques '/tmp/dupln'
 INFO: Scanning: '/tmp/dupln'
 /tmp/dupln/as/ci/i_/letters
 /tmp/dupln/ascii_letters
@@ -76,7 +81,8 @@ INFO: Scanning: '/tmp/dupln'
 INFO: Total devices 1; disk_size 564b; files 35; inodes 18; same_ino 9; size 1.1k; unique_size 8;
 ```
 
-## show stats about duplicate files 
+## show stats about duplicate files
+
 ```
 > dupln stat '/tmp/dupln'
 INFO: Scanning: '/tmp/dupln'
@@ -84,12 +90,13 @@ INFO: Total disk_size 564b; files 35; inodes 18; same_ino 9; same_size 8; size 1
 ```
 
 ## stats meaning
-* disk_size - total size excluding duplicate files
-* size - total size including duplicate files
-* files - total files found
-* inodes - total unique i-nodes found
-* same_ino - total unique i-nodes found at least twice
-* same_size - total unique size found at least twice
-* same_hash - total unique hash found at least twice
-* unique_size - total unique size found
-* uniq_hash - total unique file hash found
+
+- disk_size - total size excluding duplicate files
+- size - total size including duplicate files
+- files - total files found
+- inodes - total unique i-nodes found
+- same_ino - total unique i-nodes found at least twice
+- same_size - total unique size found at least twice
+- same_hash - total unique hash found at least twice
+- unique_size - total unique size found
+- uniq_hash - total unique file hash found

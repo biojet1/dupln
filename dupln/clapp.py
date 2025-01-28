@@ -27,7 +27,8 @@ class CLApp(object):
     ):
         if argp is None:
             argp = self.new_argparse()
-        self.arguments(argp)
+        self.init_argparse(argp)
+        self.add_arguments(argp)
         self.parse_arguments(argp, args)
         self.ready()
         self.start()
@@ -39,7 +40,10 @@ class CLApp(object):
 
         return ArgumentParser()
 
-    def arguments(self, argp: "argparse.ArgumentParser"):
+    def init_argparse(self, argp):
+        pass
+
+    def add_arguments(self, argp: "argparse.ArgumentParser"):
         def arg(kw, x):
             kw["dest"] = x.name
 
@@ -137,7 +141,8 @@ class CLApp(object):
                     # sp.
                 p = sp.add_parser(k.pop("name"), *k)
                 p.set_defaults(_sub_apps=s)
-                s.arguments(p)
+                s.init_argparse(p)
+                s.add_arguments(p)
         if sp:
             ns = argp.parse_args(args, namespace=NS())
             # print("A", ns.__class__.__name__, list(ns.__dict__.items()))

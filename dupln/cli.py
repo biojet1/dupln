@@ -74,15 +74,6 @@ class Base(CLApp):
             )
         return super().ready()
 
-
-@dataclass
-class Stat(Base):
-    linker = None
-
-    def arguments(self, argp: ArgumentParser):
-        argp.description = "Kill none existing process of a run id"
-        return super().arguments(argp)
-
     def start(self):
         # print(self.__class__.__name__, self.__dict__)
         from logging import error, info
@@ -98,7 +89,7 @@ class Stat(Base):
                 st = stat(f)
             except Exception:
                 tot.file_err += 1
-                if not carry_on:
+                if carry_on is False:
                     raise
                 from sys import exc_info
 
@@ -123,13 +114,20 @@ class Stat(Base):
             self.total and info("Total {}".format(self.total))
         return self.total
 
+
+@dataclass
+class Stat(Base):
     def go(self, db: dict):
         link_duplicates(
             db,
-            self.linker and get_linker(self.linker),
+            None,
             self.total,
             self.carry_on,
         )
+
+    def init_argparse(self, argp: ArgumentParser):
+        argp.description = r"stats about linked files under given directory"
+        return super().init_argparse(argp)
 
 
 @dataclass
@@ -140,11 +138,27 @@ class Link(Stat):
         default="os.link",
     )
 
+    def go(self, db: dict):
+        link_duplicates(
+            db,
+            get_linker(self.linker),
+            self.total,
+            self.carry_on,
+        )
+
+    def add_arguments(self, argp: ArgumentParser):
+        argp.description = r"link files under given directory"
+        return super().add_arguments(argp)
+
 
 @dataclass
-class Uniqs(Stat):
+class Uniques(Stat):
     def go(self, db: dict):
         list_uniques(db, self.total)
+
+    def init_argparse(self, argp: ArgumentParser):
+        argp.description = r"list unique files under given directory"
+        return super().init_argparse(argp)
 
 
 @dataclass
@@ -154,18 +168,22 @@ class Duplicates(Stat):
 
         list_duplicates(db, self.total)
 
+    def init_argparse(self, argp: ArgumentParser):
+        argp.description = r"list duplicates files under given directory"
+        return super().init_argparse(argp)
+
 
 @dataclass
 class Main(CLApp):
-    def arguments(self, argp: ArgumentParser):
+    def add_arguments(self, argp: ArgumentParser):
         argp.prog = f"python -m {__package__}"
-        argp.description = "This command-line tool ensures that a specified command or process is only executed if it is not already running. It helps prevent duplicate executions, making it ideal for managing tasks, daemons, or background jobs that need to run exclusively."
-        return super().arguments(argp)
+        argp.description = r"This command-line application scans a specified directory for duplicate files and replaces duplicates with hard links to a single copy of the file. By doing so, it conserves storage space while preserving the file structure and accessibility."
+        return super().add_arguments(argp)
 
     def sub_apps(self):
         yield Stat(), {"name": "stat"}
         yield Link(), {"name": "link"}
-        yield Uniqs(), {"name": "unique_files"}
+        yield Uniques(), {"name": "uniques"}
         yield Duplicates(), {"name": "duplicates"}
 
 

@@ -29,7 +29,7 @@ class App(LogOpt, DryRunOpt, Base):
         super().options(
             opt.arg(
                 "action",
-                choices=("link", "stat", "unique_files", "debug"),
+                choices=("link", "stat", "uniques", "debug"),
                 required=True,
             )
             .arg(append="paths", required="+")
@@ -90,7 +90,7 @@ class App(LogOpt, DryRunOpt, Base):
         try:
             if action == "debug":
                 dump_db(db)
-            elif action == "unique_files":
+            elif action == "uniques":
                 list_uniques(db, self.total)
             elif action == "stat":
                 link_duplicates(db, None, self.total, self.carry_on)
