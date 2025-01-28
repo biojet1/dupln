@@ -1,5 +1,13 @@
-from ocli import Base
-from ocli.extra import Counter as Total, DryRunOpt, LogOpt
+from dataclasses import dataclass
+from argparse import ArgumentParser
+from .clapp import CLApp, flag, arg
+from . import (
+    add_file,
+    get_linker,
+    link_duplicates,
+    list_uniques,
+    scan_dir,
+)
 
 
 def filesizef(s):
@@ -13,7 +21,33 @@ def filesizef(s):
     return ("%.1f" % s).rstrip("0").rstrip(".") + x
 
 
-class Counter2(Total):
+class Counter(object):
+    def __getattr__(self, name):
+        return self.__dict__.setdefault(name, 0)
+
+    def __contains__(self, name):
+        return name in self.__dict__
+
+    def __iter__(self):
+        return iter(self.__dict__)
+
+    def __getitem__(self, name):
+        return self.__dict__.setdefault(name, 0)
+
+    def __setitem__(self, key, value):
+        self.__dict__[key] = value
+
+    def __str__(self):
+        return " ".join(
+            sorted(self._format_entry(k, v) for (k, v) in self.__dict__.items())
+        )
+
+    def _format_value(self, value, key):
+        return str(value)
+
+    def _format_entry(self, key, value):
+        return str(key) + " " + self._format_value(value, key) + ";"
+
     def _format_value(self, value, key):
         # type: (Any, str) -> str
         if key in ("size", "disk_size"):
@@ -21,48 +55,31 @@ class Counter2(Total):
         return str(value)
 
 
-class App(LogOpt, DryRunOpt, Base):
-    dry_run = False
+@dataclass
+class Base(CLApp):
+    paths: list[str] = arg("PATH", "search to", nargs="+")
+    carry_on: bool = flag("carry-on", "Continue on file errors", default=None)
+    total = Counter()
 
-    def options(self, opt):
-        opt.prog = "python -m dupln"
-        super().options(
-            opt.arg(
-                "action",
-                choices=("link", "stat", "uniques", "debug"),
-                required=True,
-            )
-            .arg(append="paths", required="+")
-            .flag("carry_on", help="Continue on file errors", default=None)
-            .param(
-                "linker",
-                "l",
-                help="The linker to use",
-                choices=("os.link", "ln", "lns", "os.symlink"),
-                default="os.link",
-            )
-        )
+    def ready(self):
+        if 1:
+            import logging
 
-    def start(self, **kwargs):
+            logging.basicConfig(
+                **dict(
+                    level=getattr(logging, "INFO"), format="%(levelname)s: %(message)s"
+                )
+            )
+        return super().ready()
+
+    def start(self):
+        # print(self.__class__.__name__, self.__dict__)
         from logging import error, info
         from os import stat
         from stat import S_ISDIR
 
-        from . import (
-            add_file,
-            dump_db,
-            get_linker,
-            link_duplicates,
-            list_uniques,
-            scan_dir,
-        )
-
-        # print("start", self.__dict__)
-        # print("action", self.action)
-        # print("linker", self.paths)
-
         db = dict()
-        tot = self.total = Counter2()
+        tot = self.total = Counter()
         carry_on = self.carry_on
 
         def statx(f):
@@ -70,7 +87,7 @@ class App(LogOpt, DryRunOpt, Base):
                 st = stat(f)
             except Exception:
                 tot.file_err += 1
-                if not carry_on:
+                if carry_on is False:
                     raise
                 from sys import exc_info
 
@@ -81,40 +98,91 @@ class App(LogOpt, DryRunOpt, Base):
 
         for x in self.paths:
             mode, size, ino, dev, mtime = statx(x)
+            # print(x, S_ISDIR(mode))
             if S_ISDIR(mode):
                 scan_dir(x, db, statx)
             else:
                 add_file(db, x, size, ino, dev, mtime)
-        action = self.action
 
         try:
-            if action == "debug":
-                dump_db(db)
-            elif action == "uniques":
-                list_uniques(db, self.total)
-            elif action == "stat":
-                link_duplicates(db, None, self.total, self.carry_on)
-            elif action == "link":
-                link_duplicates(
-                    db,
-                    get_linker(self.linker),
-                    self.total,
-                    self.carry_on,
-                )
-            else:
-                raise RuntimeError(f"Unknown action {action}")
+            self.go(db)
+
         finally:
+            # print(len(db))
             self.total and info("Total {}".format(self.total))
         return self.total
 
 
-def main():
-    return App().main()
+@dataclass
+class Stat(Base):
+    def go(self, db: dict):
+        link_duplicates(
+            db,
+            None,
+            self.total,
+            self.carry_on,
+        )
+
+    def init_argparse(self, argp: ArgumentParser):
+        argp.description = r"Stats about linked files under given directory"
+        return super().init_argparse(argp)
 
 
-(__name__ == "__main__") and main()
+@dataclass
+class Link(Stat):
+    linker: str = flag(
+        "The linker to use",
+        choices=("os.link", "ln", "lns", "os.symlink"),
+        default="os.link",
+    )
 
-from typing import TYPE_CHECKING
+    def go(self, db: dict):
+        link_duplicates(
+            db,
+            get_linker(self.linker),
+            self.total,
+            self.carry_on,
+        )
 
-if TYPE_CHECKING:
-    from typing import *
+    def add_arguments(self, argp: ArgumentParser):
+        argp.description = r"Link files under given directory"
+        return super().add_arguments(argp)
+
+
+@dataclass
+class Uniques(Stat):
+    def go(self, db: dict):
+        list_uniques(db, self.total)
+
+    def init_argparse(self, argp: ArgumentParser):
+        argp.description = r"List unique files under given directory"
+        return super().init_argparse(argp)
+
+
+@dataclass
+class Duplicates(Stat):
+    def go(self, db: dict):
+        from . import list_duplicates
+
+        list_duplicates(db, self.total)
+
+    def init_argparse(self, argp: ArgumentParser):
+        argp.description = r"List duplicates files under given directory"
+        return super().init_argparse(argp)
+
+
+@dataclass
+class Main(CLApp):
+    def add_arguments(self, argp: ArgumentParser):
+        argp.prog = f"python -m {__package__}"
+        argp.description = r"This command-line application scans a specified directory for duplicate files and replaces duplicates with hard links to a single copy of the file. By doing so, it conserves storage space while preserving the file structure and accessibility."
+        return super().add_arguments(argp)
+
+    def sub_apps(self):
+        yield Stat(), {"name": "stat"}
+        yield Link(), {"name": "link"}
+        yield Uniques(), {"name": "uniques"}
+        yield Duplicates(), {"name": "duplicates"}
+
+
+(__name__ == "__main__") and Main().main()

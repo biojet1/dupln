@@ -11,7 +11,8 @@
 [github.com/biojet1/dupln](https://github.com/biojet1/dupln)
 [pypi.org/project/dupln](https://pypi.org/project/dupln/)
 
-Hard link files with same content
+This command-line application scans a specified directory for duplicate files and replaces duplicates with hard links to a single
+copy of the file. By doing so, it conserves storage space while preserving the file structure and accessibility.
 
 # Install
 
@@ -21,7 +22,7 @@ Hard link files with same content
 
 # Usage
 
-## hard link files with same content
+## Hard link files with same content
 
 ```
 > dupln link '/tmp/dupln'
@@ -55,7 +56,7 @@ INFO:  - '/tmp/dupln/wh/itespace' - '/tmp/dupln/wh/tmpg7bw47b1' [0]
 INFO: Total disk_size 564b; files 35; inodes 35; linked 17; same_hash 9; same_size 8; size 1.1k; uniq_hash 9;
 ```
 
-## list unique file content
+## List unique file content
 
 ```
 > dupln uniques '/tmp/dupln'
@@ -81,7 +82,7 @@ INFO: Scanning: '/tmp/dupln'
 INFO: Total devices 1; disk_size 564b; files 35; inodes 18; same_ino 9; size 1.1k; unique_size 8;
 ```
 
-## show stats about duplicate files
+## Show stats about duplicate files
 
 ```
 > dupln stat '/tmp/dupln'
@@ -89,7 +90,7 @@ INFO: Scanning: '/tmp/dupln'
 INFO: Total disk_size 564b; files 35; inodes 18; same_ino 9; same_size 8; size 1.1k;
 ```
 
-## stats meaning
+## Stats meaning
 
 - disk_size - total size excluding duplicate files
 - size - total size including duplicate files
