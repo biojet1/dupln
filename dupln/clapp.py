@@ -150,6 +150,7 @@ class CLApp(object):
             else:
                 q = set(x.name for x in fields(s))
                 s._parent_arg = self
+                self._child_arg = s
                 for k, v in ns.__dict__.items():
                     if k in q:
                         setattr(s, k, v)

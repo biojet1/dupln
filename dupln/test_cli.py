@@ -61,6 +61,7 @@ class Test(unittest.TestCase):
         v = test()
 
         from .__main__ import App
+        from .cli import Main
 
         # Total disk_size 836b; files 26; inodes 26; same_size 8; size 836b;
         total = App().main(["cmd", "stat", tmp])
@@ -69,6 +70,16 @@ class Test(unittest.TestCase):
         self.assertEqual(total.inodes, v["files"])
         self.assertEqual(total.same_size, v["same_size"])
         self.assertEqual(total.size, v["size"])
+        #######
+        a = Main()
+        a.main(["stat", tmp])
+        total = a._child_arg.total
+        self.assertEqual(total.disk_size, v["size"])
+        self.assertEqual(total.files, v["files"])
+        self.assertEqual(total.inodes, v["files"])
+        self.assertEqual(total.same_size, v["same_size"])
+        self.assertEqual(total.size, v["size"])
+
         # Total devices 1; disk_size 836b; files 26; inodes 26; size 836b; unique_size 8;
         total = App().main(["cmd", "unique_files", tmp])
         self.assertEqual(total.disk_size, v["size"])
@@ -94,6 +105,16 @@ class Test(unittest.TestCase):
         self.assertEqual(total.unique_size, v["same_size"])
         #
         total = App().main(["cmd", "stat", tmp])
+        self.assertEqual(total.disk_size, v["disk_size"])
+        self.assertEqual(total.files, v["files"])
+        self.assertEqual(total.same_size, v["same_size"])
+        self.assertEqual(total.inodes, v["unique_files"])
+        self.assertEqual(total.size, v["size"])
+
+        #######
+        a = Main()
+        a.main(["stat", tmp])
+        total = a._child_arg.total
         self.assertEqual(total.disk_size, v["disk_size"])
         self.assertEqual(total.files, v["files"])
         self.assertEqual(total.same_size, v["same_size"])

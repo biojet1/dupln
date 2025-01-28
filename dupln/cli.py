@@ -109,7 +109,7 @@ class Stat(Base):
 
         for x in self.paths:
             mode, size, ino, dev, mtime = statx(x)
-            print(x, S_ISDIR(mode))
+            # print(x, S_ISDIR(mode))
             if S_ISDIR(mode):
                 scan_dir(x, db, statx)
             else:
