@@ -199,7 +199,6 @@ def arg(
     repr=False,
     hash=None,
     compare=True,
-    kw_only=MISSING,
     **kwargs,
 ):
     d: dict = {"name": args}
@@ -217,7 +216,6 @@ def arg(
             hash=hash,
             compare=compare,
             metadata=metadata,
-            kw_only=kw_only,
         )
     else:
         d["default"] = default
@@ -229,7 +227,6 @@ def arg(
             hash=hash,
             compare=compare,
             metadata=metadata,
-            kw_only=kw_only,
         )
 
 
@@ -241,7 +238,6 @@ def flag(
     repr=False,
     hash=None,
     compare=True,
-    kw_only=MISSING,
     **kwargs,
 ):
     d: dict = {"flag": args}
@@ -259,7 +255,6 @@ def flag(
             hash=hash,
             compare=compare,
             metadata=metadata,
-            kw_only=kw_only,
         )
     else:
         d["default"] = default
@@ -271,5 +266,4 @@ def flag(
             hash=hash,
             compare=compare,
             metadata=metadata,
-            kw_only=kw_only,
         )
