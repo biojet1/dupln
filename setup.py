@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="dupln",
-    version="0.0.4",
+    version="0.0.6",
     author="biojet1",
     author_email="biojet1@gmail.com",
     description="Hard link files with same content",
@@ -13,7 +13,7 @@ setup(
     entry_points={
         "console_scripts": ["dupln=dupln.__main__:main"],
     },
-    install_requires=["ocli"],
+    install_requires=[],
     classifiers=[
         "Intended Audience :: Developers",
         "Natural Language :: English",

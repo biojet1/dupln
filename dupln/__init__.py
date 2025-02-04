@@ -107,7 +107,7 @@ def link_duplicates(db, linker, tot, carry_on):
                         tot.linked += n
                         tot.disk_size += size
                 else:  # n == 1
-                    tot.uniq_hash += 1
+                    tot.unique_hash += 1
                     tot.disk_size += size
 
 
@@ -201,6 +201,36 @@ def list_uniques(db, tot):
                 tot.disk_size += size
                 path = paths.pop()
                 print(path)
+
+
+def list_duplicates(db, tot, size_filter=None, filesizef=None):
+    # type: (Dict[int, Dict[int, Dict[int, Set[str]]]], Any) -> None
+    tot.devices = len(db)
+    if filesizef is None:
+        filesizef = lambda x: str(x)
+
+    while db:
+        dev, size_map = db.popitem()
+        tot.unique_size = len(size_map)
+        while size_map:
+            size, ino_map = size_map.popitem()
+            while ino_map:
+                ino, paths = ino_map.popitem()
+                n = len(paths)
+                w = n > 1
+                if w:
+                    if size_filter is not None:
+                        w = size_filter(size)
+                    tot.same_ino += 1
+                    if w:
+                        print(f"+ inode:{ino} links:{n} size:{filesizef(size)}")
+                        for p in paths:
+                            print(f" - {p}")
+                tot.files += n
+                tot.inodes += 1
+                tot.size += n * size
+                tot.disk_size += size
+                path = paths.pop()
 
 
 def dump_db(db):

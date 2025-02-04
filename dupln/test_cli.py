@@ -48,7 +48,7 @@ class Test(unittest.TestCase):
 
             return dict(
                 same_file=sum(1 for count in same_file.values() if count > 1),
-                unique_files=len(same_file),
+                uniques=len(same_file),
                 disk_size=sum(size_hash[0] for size_hash in same_file.keys()),
                 size=sum(
                     size_hash[0] * count for size_hash, count in same_file.items()
@@ -62,22 +62,27 @@ class Test(unittest.TestCase):
 
         from .__main__ import App
 
-        # Total disk_size 836b; files 26; inodes 26; same_size 8; size 836b;
-        total = App().main(["cmd", "stat", tmp])
+        #######
+        a = App()
+        a.main(["stat", tmp])
+        total = a._sub_arg.total
         self.assertEqual(total.disk_size, v["size"])
         self.assertEqual(total.files, v["files"])
         self.assertEqual(total.inodes, v["files"])
         self.assertEqual(total.same_size, v["same_size"])
         self.assertEqual(total.size, v["size"])
-        # Total devices 1; disk_size 836b; files 26; inodes 26; size 836b; unique_size 8;
-        total = App().main(["cmd", "unique_files", tmp])
+        a = App()
+        a.main(["uniques", tmp])
+        total = a._sub_arg.total
         self.assertEqual(total.disk_size, v["size"])
         self.assertEqual(total.files, v["files"])
         self.assertEqual(total.inodes, v["files"])
         self.assertEqual(total.size, v["size"])
         self.assertEqual(total.unique_size, v["same_size"])
-        # disk_size ; files ; inodes ; linked ; same_hash ; same_size ; size ;
-        total = App().main(["cmd", "link", tmp])
+        #######
+        a = App()
+        a.main(["link", tmp])
+        total = a._sub_arg.total
         self.assertEqual(total.disk_size, v["disk_size"])
         self.assertEqual(total.files, v["files"])
         self.assertEqual(total.inodes, v["files"])
@@ -85,17 +90,20 @@ class Test(unittest.TestCase):
         self.assertEqual(total.same_hash, v["same_file"])
         self.assertEqual(total.same_size, v["same_size"])
         self.assertEqual(total.size, v["size"])
-        #
-        total = App().main(["cmd", "unique_files", tmp])
-        self.assertEqual(total.disk_size, v["disk_size"])
-        self.assertEqual(total.files, v["files"])
-        self.assertEqual(total.inodes, v["unique_files"])
-        self.assertEqual(total.size, v["size"])
-        self.assertEqual(total.unique_size, v["same_size"])
-        #
-        total = App().main(["cmd", "stat", tmp])
+        #######
+        a = App()
+        a.main(["stat", tmp])
+        total = a._sub_arg.total
         self.assertEqual(total.disk_size, v["disk_size"])
         self.assertEqual(total.files, v["files"])
         self.assertEqual(total.same_size, v["same_size"])
-        self.assertEqual(total.inodes, v["unique_files"])
+        self.assertEqual(total.inodes, v["uniques"])
         self.assertEqual(total.size, v["size"])
+        a = App()
+        a.main(["uniques", tmp])
+        total = a._sub_arg.total
+        self.assertEqual(total.disk_size, v["disk_size"])
+        self.assertEqual(total.files, v["files"])
+        self.assertEqual(total.inodes, v["uniques"])
+        self.assertEqual(total.size, v["size"])
+        self.assertEqual(total.unique_size, v["same_size"])
