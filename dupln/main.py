@@ -1,4 +1,4 @@
-class App(object):
+class Main(object):
     def __getattr__(self, name: str):
         if not name.startswith("_get_"):
             f = getattr(self, f"_get_{name}", None)

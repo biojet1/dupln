@@ -45,7 +45,7 @@ def file_sort_key(x):
 
 
 def link_duplicates(db, linker, tot, carry_on):
-    # type: (Dict[int, Dict[int, Dict[int, Set[str]]]], Callable[[str, str], None], Any, bool) -> None
+    # type: (Dict[int, Dict[int, Dict[int, Set[str]]]], Union[Callable[[str, str], None],None], Any, bool) -> None
     if len(db) > 1:
         tot.devices = len(db)
     while db:
@@ -204,7 +204,7 @@ def list_uniques(db, tot):
 
 
 def list_duplicates(db, tot, size_filter=None, filesizef=None):
-    # type: (Dict[int, Dict[int, Dict[int, Set[str]]]], Any) -> None
+    # type: (Dict[int, Dict[int, Dict[int, Set[str]]]], Any, Union[Callable[[int], bool],None], Union[Callable[[int], str],None]) -> None
     tot.devices = len(db)
     if filesizef is None:
         filesizef = lambda x: str(x)

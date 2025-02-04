@@ -1,7 +1,4 @@
-from argparse import ArgumentParser
-from .main import App, flag, arg
-
-# from .__main__ import Counter, filesizef, filesizep
+from .main import Main, flag, arg
 from . import (
     add_file,
     get_linker,
@@ -9,6 +6,11 @@ from . import (
     list_uniques,
     scan_dir,
 )
+from typing import TYPE_CHECKING, Any, Union
+
+if TYPE_CHECKING:
+    from argparse import ArgumentParser
+    from typing import Sequence
 
 
 def filesizef(s):
@@ -51,9 +53,6 @@ class Counter(object):
             sorted(self._format_entry(k, v) for (k, v) in self.__dict__.items())
         )
 
-    def _format_value(self, value, key):
-        return str(value)
-
     def _format_entry(self, key, value):
         return str(key) + " " + self._format_value(value, key) + ";"
 
@@ -64,13 +63,10 @@ class Counter(object):
         return str(value)
 
 
-class Base(App):
+class Base(Main):
     paths: list[str] = arg("PATH", "search to", nargs="+")
     carry_on: bool = flag("carry-on", "Continue on file errors", default=None)
     total = Counter()
-
-    # def start(self):
-    #     print(self.__class__.__name__, self.__dict__)
 
     def ready(self):
         if 1:
@@ -134,7 +130,7 @@ class Stat(Base):
             self.carry_on,
         )
 
-    def init_argparse(self, argp: ArgumentParser):
+    def init_argparse(self, argp: "ArgumentParser"):
         argp.description = r"Stats about linked files under given directory"
         return super().init_argparse(argp)
 
@@ -154,7 +150,7 @@ class Link(Stat):
             self.carry_on,
         )
 
-    def init_argparse(self, argp: ArgumentParser):
+    def init_argparse(self, argp: "ArgumentParser"):
         argp.description = r"Link files under given directory"
         return super().init_argparse(argp)
 
@@ -163,7 +159,7 @@ class Uniques(Stat):
     def go(self, db: dict):
         list_uniques(db, self.total)
 
-    def init_argparse(self, argp: ArgumentParser):
+    def init_argparse(self, argp: "ArgumentParser"):
         argp.description = r"List unique files under given directory"
         return super().init_argparse(argp)
 
@@ -188,21 +184,16 @@ class Duplicates(Stat):
 
         list_duplicates(db, self.total, size_filter=self.size_range, **kw)
 
-    def init_argparse(self, argp: ArgumentParser):
+    def init_argparse(self, argp: "ArgumentParser"):
         argp.description = r"List duplicates files under given directory"
         return super().init_argparse(argp)
 
 
-class App(App):
-    # verbosity: list = (
-    #     flag("loud", "loud help", const="LOUD"),
-    #     flag("q", const="QUIET"),
-    # )
+class App(Main):
 
-    def add_arguments(self, argp: ArgumentParser):
+    def add_arguments(self, argp: "ArgumentParser"):
         argp.prog = f"python -m {__package__}"
         argp.description = r"This command-line application scans a specified directory for duplicate files and replaces duplicates with hard links to a single copy of the file. By doing so, it conserves storage space while preserving the file structure and accessibility."
-        # argp.add_argument("-v", action="version", version="2.0")
         return super().add_arguments(argp)
 
     def sub_args(self):
@@ -211,15 +202,5 @@ class App(App):
         yield Uniques(), {"name": "uniques"}
         yield Duplicates(), {"name": "duplicates"}
 
-    # def start(self):
-    #     print(self.__class__.__name__, self.__dict__)
-
 
 (__name__ == "__main__") and App().main()
-# (__name__ == "__main__") and Link().main()
-
-from typing import TYPE_CHECKING, Any, Union
-
-if TYPE_CHECKING:
-    import argparse
-    from typing import Sequence
