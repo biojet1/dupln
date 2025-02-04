@@ -45,7 +45,7 @@ def file_sort_key(x):
 
 
 def link_duplicates(db, linker, tot, carry_on):
-    # type: (Dict[int, Dict[int, Dict[int, Set[str]]]], Callable[[str, str], None], Any, bool) -> None
+    # type: (Dict[int, Dict[int, Dict[int, Set[str]]]], Union[Callable[[str, str], None],None], Any, bool) -> None
     if len(db) > 1:
         tot.devices = len(db)
     while db:
@@ -95,7 +95,10 @@ def link_duplicates(db, linker, tot, carry_on):
                 if n > 1:
                     tot.same_hash += 1
                     try:
-                        n = link_dups(linker, sorted(files, key=file_sort_key))
+                        if linker is None:
+                            n = len(files)
+                        else:
+                            n = link_dups(linker, sorted(files, key=file_sort_key))
                     except Exception:
                         tot.link_err += 1
                         if not carry_on:
@@ -203,9 +206,11 @@ def list_uniques(db, tot):
                 print(path)
 
 
-def list_duplicates(db, tot):
-    # type: (Dict[int, Dict[int, Dict[int, Set[str]]]], Any) -> None
+def list_duplicates(db, tot, size_filter=None, filesizef=None):
+    # type: (Dict[int, Dict[int, Dict[int, Set[str]]]], Any, Union[Callable[[int], bool],None], Union[Callable[[int], str],None]) -> None
     tot.devices = len(db)
+    if filesizef is None:
+        filesizef = lambda x: str(x)
 
     while db:
         dev, size_map = db.popitem()
@@ -215,11 +220,15 @@ def list_duplicates(db, tot):
             while ino_map:
                 ino, paths = ino_map.popitem()
                 n = len(paths)
-                if n > 1:
+                w = n > 1
+                if w:
+                    if size_filter is not None:
+                        w = size_filter(size)
                     tot.same_ino += 1
-                    print(f"+ inode:{ino} links:{n} size:{size}")
-                    for p in paths:
-                        print(f" - {p}")
+                    if w:
+                        print(f"+ inode:{ino} links:{n} size:{filesizef(size)}")
+                        for p in paths:
+                            print(f" - {p}")
                 tot.files += n
                 tot.inodes += 1
                 tot.size += n * size

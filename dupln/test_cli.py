@@ -60,29 +60,29 @@ class Test(unittest.TestCase):
 
         v = test()
 
-        from .__main__ import Main
+        from .__main__ import App
 
         #######
-        a = Main()
+        a = App()
         a.main(["stat", tmp])
-        total = a._child_arg.total
+        total = a._sub_arg.total
         self.assertEqual(total.disk_size, v["size"])
         self.assertEqual(total.files, v["files"])
         self.assertEqual(total.inodes, v["files"])
         self.assertEqual(total.same_size, v["same_size"])
         self.assertEqual(total.size, v["size"])
-        a = Main()
+        a = App()
         a.main(["uniques", tmp])
-        total = a._child_arg.total
+        total = a._sub_arg.total
         self.assertEqual(total.disk_size, v["size"])
         self.assertEqual(total.files, v["files"])
         self.assertEqual(total.inodes, v["files"])
         self.assertEqual(total.size, v["size"])
         self.assertEqual(total.unique_size, v["same_size"])
         #######
-        a = Main()
+        a = App()
         a.main(["link", tmp])
-        total = a._child_arg.total
+        total = a._sub_arg.total
         self.assertEqual(total.disk_size, v["disk_size"])
         self.assertEqual(total.files, v["files"])
         self.assertEqual(total.inodes, v["files"])
@@ -91,17 +91,17 @@ class Test(unittest.TestCase):
         self.assertEqual(total.same_size, v["same_size"])
         self.assertEqual(total.size, v["size"])
         #######
-        a = Main()
+        a = App()
         a.main(["stat", tmp])
-        total = a._child_arg.total
+        total = a._sub_arg.total
         self.assertEqual(total.disk_size, v["disk_size"])
         self.assertEqual(total.files, v["files"])
         self.assertEqual(total.same_size, v["same_size"])
         self.assertEqual(total.inodes, v["uniques"])
         self.assertEqual(total.size, v["size"])
-        a = Main()
+        a = App()
         a.main(["uniques", tmp])
-        total = a._child_arg.total
+        total = a._sub_arg.total
         self.assertEqual(total.disk_size, v["disk_size"])
         self.assertEqual(total.files, v["files"])
         self.assertEqual(total.inodes, v["uniques"])
