@@ -58,7 +58,7 @@ class Main(object):
                     # sp.
                 s._parent_arg = self
                 p = sp.add_parser(k.pop("name"), *k)
-                p.set_defaults(_sub_apps=s)
+                p.set_defaults(_sub_arg=s)
                 s.init_argparse(p)
                 s.add_arguments(p)
 
@@ -67,7 +67,7 @@ class Main(object):
             # print("A", ns.__class__.__name__, list(ns.__dict__.items()))
 
             try:
-                s = self._sub_arg = ns._sub_apps
+                s = self._sub_arg = ns._sub_arg
             except AttributeError:
                 raise
             else:

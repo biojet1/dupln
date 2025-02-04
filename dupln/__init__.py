@@ -95,7 +95,10 @@ def link_duplicates(db, linker, tot, carry_on):
                 if n > 1:
                     tot.same_hash += 1
                     try:
-                        n = link_dups(linker, sorted(files, key=file_sort_key))
+                        if linker is None:
+                            n = len(files)
+                        else:
+                            n = link_dups(linker, sorted(files, key=file_sort_key))
                     except Exception:
                         tot.link_err += 1
                         if not carry_on:
